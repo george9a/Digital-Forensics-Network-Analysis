@@ -1,0 +1,62 @@
+🛡️ Partea 1: Digital Forensics & Network Analysis
+1. Analiza Traficului de Rețea (Fișiere .pcap, .pcapng)
+
+Atunci când primești o captură de trafic, obiectivul este să vezi ce a descărcat victima sau ce a trimis atacatorul.
+
+    Metode de rezolvare:
+
+        Export de obiecte: Prima acțiune în Wireshark: File -> Export Objects -> HTTP.... Salvează tot ce pare suspect (imagini, fișiere .php, .js sau .txt).
+
+        Urmărirea fluxului (Follow Stream): Dacă vezi un pachet interesant (ex: un login), dă click dreapta -> Follow -> TCP Stream sau HTTP Stream. Aici vezi datele în clar (parole, flag-uri).
+
+        Filtre esențiale (Pune-le pe GitHub!):
+
+            http.request.method == "POST" (Căutăm trimitere de date/parole)
+
+            http contains "flag" (Căutare directă după cuvântul flag)
+
+            ip.addr == [IP_SUSPECT] (Filtrare după adresa atacatorului)
+
+            dns (Să vezi ce site-uri a vizitat victima)
+
+2. Analiza Log-urilor Web (Fișiere log.txt, access.log)
+
+Aici te uiți la mii de linii de text pentru a găsi anomalia.
+
+    Metode de rezolvare:
+
+        Identificarea atacului de tip Brute Force: Căutăm mii de cereri POST de la același IP într-un interval scurt.
+
+        Identificarea succesului: Atacatorul primește multe erori (cod 401 sau 404), apoi dintr-o dată un cod de succes (200 sau 302).
+
+        Comenzi de Terminal (Salvare rapidă):
+
+            Vezi cele mai active IP-uri: cat log.txt | cut -d' ' -f1 | sort | uniq -c | sort -nr | head -n 10
+
+            Caută încercări de SQL Injection: grep "UNION" log.txt sau grep "SELECT" log.txt
+
+            Caută încercări de XSS: grep "<script>" log.txt
+
+3. Analiza Fișierelor Complicate (Artifacts & File Carving)
+
+Dacă primești un fișier care „nu se deschide” sau pare a fi o imagine banală.
+
+    Metode de rezolvare:
+
+        Căutare de string-uri: Comanda strings [nume_fisier] | grep -i "OSC" poate găsi flag-ul ascuns direct în codul binar al fișierului.
+
+        Identificarea tipului real: Dacă un fișier se numește poza.jpg dar nu se deschide, rulează file poza.jpg. Poate fi de fapt o arhivă .zip redenumită.
+
+        Steganografie (Date ascunse în imagini):
+
+            Folosește AperiSolve.com (online) – rulează automat steghide, exiftool, zsteg și outguess.
+
+            Dacă are parolă, încearcă nume de utilizatori găsiți în alte probe.
+
+🔗 Surse și Unelte "Must-Have"
+Unealtă	Sursă/Link	Utilizare
+Wireshark	Instalată pe PC	Analiză fișiere PCAP (Trafic rețea)
+CyberChef	gchq.github.io/CyberChef	Conversie din orice (Hex, Base64, etc.)
+AperiSolve	aperisolve.com	Forensics pentru imagini (Steganografie)
+ExifTool	exifmeta.com	Vezi metadata (locație, autor, dată) în poze
+CrackStation	crackstation.net	Sparge hash-uri de parole găsite în log-uri
